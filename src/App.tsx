@@ -10,6 +10,7 @@ import { ImageLearningPage } from './pages/ImageLearningPage';
 import { QuizPage } from './pages/QuizPage';
 import { ReviewPage } from './pages/ReviewPage';
 import { ProfilePage } from './pages/ProfilePage';
+import { CreateLessonPage } from './pages/CreateLessonPage';
 import { motion, AnimatePresence } from 'motion/react';
 
 const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
@@ -20,9 +21,9 @@ const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
   }
 
   return (
-    <div className="flex min-h-screen bg-slate-50 font-sans text-slate-900">
+    <div className="flex flex-col lg:flex-row min-h-screen bg-slate-50 font-sans text-slate-900">
       <Sidebar />
-      <main className="flex-1 p-8 overflow-y-auto max-h-screen">
+      <main className="flex-1 p-4 md:p-8 pb-24 lg:pb-8 overflow-y-auto max-h-screen">
         <AnimatePresence mode="wait">
           <motion.div
             key={window.location.pathname}
@@ -46,6 +47,7 @@ export default function App() {
         <Route path="/login" element={<LoginPage />} />
         
         <Route path="/" element={<ProtectedLayout><DashboardPage /></ProtectedLayout>} />
+        <Route path="/create-lesson" element={<ProtectedLayout><CreateLessonPage /></ProtectedLayout>} />
         <Route path="/lesson" element={<ProtectedLayout><DailyLessonPage /></ProtectedLayout>} />
         <Route path="/flashcards" element={<ProtectedLayout><FlashcardsPage /></ProtectedLayout>} />
         <Route path="/images" element={<ProtectedLayout><ImageLearningPage /></ProtectedLayout>} />

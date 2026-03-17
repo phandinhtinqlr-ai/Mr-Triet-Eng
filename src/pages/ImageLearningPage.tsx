@@ -1,18 +1,19 @@
 import { useState } from 'react';
 import { useAppState } from '../hooks/useAppState';
-import { ALL_VOCABULARY } from '../data/vocabulary';
 import { Card, Button, Badge } from '../components/UI';
 import { ImageIcon, ChevronRight, ChevronLeft, CheckCircle2, Search, Filter } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { cn } from '../components/UI';
 
 export const ImageLearningPage = () => {
-  const { state } = useAppState();
+  const { state, getAllWords } = useAppState();
   const [filter, setFilter] = useState('All');
   const [search, setSearch] = useState('');
+  const allWords = getAllWords();
 
-  const topics = ['All', ...new Set(ALL_VOCABULARY.map(w => w.topic))];
+  const topics = ['All', ...new Set(allWords.map(w => w.topic))];
 
-  const filteredWords = ALL_VOCABULARY.filter(w => {
+  const filteredWords = allWords.filter(w => {
     const matchesTopic = filter === 'All' || w.topic === filter;
     const matchesSearch = w.word.toLowerCase().includes(search.toLowerCase()) || 
                          w.meaningVietnamese.toLowerCase().includes(search.toLowerCase());
@@ -119,5 +120,3 @@ export const ImageLearningPage = () => {
     </div>
   );
 };
-
-import { cn } from '../components/UI';

@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useAppState } from '../hooks/useAppState';
-import { ALL_VOCABULARY } from '../data/vocabulary';
 import { Card, Button, Badge } from '../components/UI';
 import { Volume2, ChevronRight, ChevronLeft, CheckCircle2, XCircle, Star, Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -8,9 +7,10 @@ import { useNavigate } from 'react-router-dom';
 import { cn } from '../components/UI';
 
 export const DailyLessonPage = () => {
-  const { state, getTodayWords, updateProgress, recordActivity } = useAppState();
+  const { state, getTodayWords, getAllWords, updateProgress, recordActivity } = useAppState();
   const todayWordIds = getTodayWords();
-  const todayWords = todayWordIds.map(id => ALL_VOCABULARY.find(w => w.id === id)!);
+  const allWords = getAllWords();
+  const todayWords = todayWordIds.map(id => allWords.find(w => w.id === id)!).filter(Boolean);
   
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showDetails, setShowDetails] = useState(false);
@@ -19,14 +19,26 @@ export const DailyLessonPage = () => {
   const currentWord = todayWords[currentIndex];
   const navigate = useNavigate();
 
+  if (todayWords.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-6">
+        <h1 className="text-3xl font-bold text-slate-900">Chưa có bài học hôm nay</h1>
+        <p className="text-slate-500 max-w-md">
+          Bạn chưa nhập từ vựng nào cho hôm nay. Hãy quay lại trang chủ để tạo bài học nhé!
+        </p>
+        <Button onClick={() => navigate('/create-lesson')}>Tạo Bài Học</Button>
+      </div>
+    );
+  }
+
   const handleNext = () => {
     if (currentIndex < todayWords.length - 1) {
       setCurrentIndex(prev => prev + 1);
       setShowDetails(false);
     } else {
       setCompleted(true);
-      // Record activity: 10 words learned, 50 points
-      recordActivity({ wordsLearned: 10, pointsEarned: 50 });
+      // Record activity: words learned, points
+      recordActivity({ wordsLearned: todayWords.length, pointsEarned: todayWords.length * 5 });
     }
   };
 
@@ -65,7 +77,7 @@ export const DailyLessonPage = () => {
         </motion.div>
         <h1 className="text-3xl font-bold text-slate-900">Great job, Mr. Triết!</h1>
         <p className="text-slate-500 max-w-md">
-          You've completed today's 10 words. Your vocabulary is growing stronger every day.
+          You've completed today's {todayWords.length} words. Your vocabulary is growing stronger every day.
         </p>
         <div className="flex gap-4">
           <Button onClick={() => navigate('/')} variant="outline">Back to Dashboard</Button>
@@ -100,7 +112,7 @@ export const DailyLessonPage = () => {
         >
           <Card className="p-0 overflow-hidden shadow-xl border-none">
             <div className="grid grid-cols-1 md:grid-cols-2">
-              <div className="relative h-64 md:h-auto bg-slate-100">
+              <div className="relative h-48 sm:h-64 md:h-auto bg-slate-100">
                 <img 
                   src={currentWord.imageUrl} 
                   alt={currentWord.word} 
@@ -113,39 +125,41 @@ export const DailyLessonPage = () => {
                   </Badge>
                 </div>
               </div>
-              <div className="p-8 space-y-6">
+              <div className="p-6 sm:p-8 space-y-6">
                 <div className="flex items-start justify-between">
                   <div>
-                    <h2 className="text-4xl font-bold text-slate-900">{currentWord.word}</h2>
-                    <p className="text-indigo-600 font-mono mt-1">{currentWord.phonetic}</p>
-                    <p className="text-sm text-slate-400 italic mt-1">{currentWord.partOfSpeech}</p>
+                    <h2 className="text-3xl sm:text-4xl font-bold text-slate-900">{currentWord.word}</h2>
+                    {currentWord.phonetic && <p className="text-indigo-600 font-mono mt-1">{currentWord.phonetic}</p>}
+                    {currentWord.partOfSpeech && currentWord.partOfSpeech !== 'unknown' && <p className="text-sm text-slate-400 italic mt-1">{currentWord.partOfSpeech}</p>}
                   </div>
                   <button 
                     onClick={() => speak(currentWord.word)}
-                    className="w-12 h-12 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center hover:bg-indigo-100 transition-colors"
+                    className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center hover:bg-indigo-100 transition-colors"
                   >
                     <Volume2 size={24} />
                   </button>
                 </div>
 
                 <div className="pt-4 border-t border-slate-100">
-                  <p className="text-2xl font-semibold text-slate-800">{currentWord.meaningVietnamese}</p>
+                  <p className="text-xl sm:text-2xl font-semibold text-slate-800">{currentWord.meaningVietnamese}</p>
                 </div>
 
-                <div className="space-y-4">
-                  <div className="bg-slate-50 rounded-xl p-4">
-                    <p className="text-sm font-semibold text-slate-500 mb-1 uppercase tracking-wider">Example</p>
-                    <p className="text-slate-800 font-medium leading-relaxed">"{currentWord.exampleEnglish}"</p>
-                    <p className="text-slate-500 text-sm mt-2 italic">{currentWord.exampleVietnamese}</p>
+                {(currentWord.exampleEnglish || currentWord.exampleVietnamese) && (
+                  <div className="space-y-4">
+                    <div className="bg-slate-50 rounded-xl p-4">
+                      <p className="text-xs font-semibold text-slate-500 mb-1 uppercase tracking-wider">Example</p>
+                      {currentWord.exampleEnglish && <p className="text-sm sm:text-base text-slate-800 font-medium leading-relaxed">"{currentWord.exampleEnglish}"</p>}
+                      {currentWord.exampleVietnamese && <p className="text-slate-500 text-xs sm:text-sm mt-2 italic">{currentWord.exampleVietnamese}</p>}
+                    </div>
                   </div>
-                </div>
+                )}
 
-                <div className="flex gap-3 pt-4">
-                  <Button onClick={markAsHard} variant="outline" className="flex-1 border-red-200 text-red-600 hover:bg-red-50">
+                <div className="flex flex-col sm:flex-row gap-3 pt-4">
+                  <Button onClick={markAsHard} variant="outline" className="flex-1 border-red-200 text-red-600 hover:bg-red-50 py-3">
                     <XCircle size={18} className="mr-2" />
                     Hard Word
                   </Button>
-                  <Button onClick={markAsLearned} className="flex-1 bg-emerald-600 hover:bg-emerald-700">
+                  <Button onClick={markAsLearned} className="flex-1 bg-emerald-600 hover:bg-emerald-700 py-3">
                     <CheckCircle2 size={18} className="mr-2" />
                     Got it!
                   </Button>

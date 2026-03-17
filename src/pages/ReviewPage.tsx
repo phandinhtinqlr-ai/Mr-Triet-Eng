@@ -1,5 +1,4 @@
 import { useAppState } from '../hooks/useAppState';
-import { ALL_VOCABULARY } from '../data/vocabulary';
 import { Card, Button, Badge } from '../components/UI';
 import { History as HistoryIcon, AlertCircle, CheckCircle2, Clock, ArrowRight, Filter, RefreshCw } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -8,56 +7,59 @@ import { cn } from '../components/UI';
 import { UserWordProgress } from '../types';
 
 export const ReviewPage = () => {
-  const { state } = useAppState();
+  const { state, getAllWords } = useAppState();
+  const allWords = getAllWords();
   
   const progressList = Object.values(state.progress) as UserWordProgress[];
   const reviewWords = progressList
     .filter(p => p.status === 'learning' || p.status === 'review' || p.isHardWord)
     .map(p => ({
       ...p,
-      data: ALL_VOCABULARY.find(w => w.id === p.wordId)!
+      data: allWords.find(w => w.id === p.wordId)!
     }))
+    .filter(p => p.data)
     .sort((a, b) => (b.wrongCount || 0) - (a.wrongCount || 0));
 
   const masteredWords = progressList
     .filter(p => p.status === 'mastered')
     .map(p => ({
       ...p,
-      data: ALL_VOCABULARY.find(w => w.id === p.wordId)!
-    }));
+      data: allWords.find(w => w.id === p.wordId)!
+    }))
+    .filter(p => p.data);
 
   return (
-    <div className="space-y-8">
-      <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="space-y-6 sm:space-y-8">
+      <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Review Center</h1>
-          <p className="text-slate-500">Focus on what matters most to your progress.</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">Review Center</h1>
+          <p className="text-sm sm:text-base text-slate-500">Focus on what matters most to your progress.</p>
         </div>
-        <div className="flex gap-3">
-          <Link to="/quiz">
-            <Button variant="outline">
-              <RefreshCw size={18} className="mr-2" />
+        <div className="flex gap-2 sm:gap-3">
+          <Link to="/quiz" className="flex-1 sm:flex-none">
+            <Button variant="outline" className="w-full text-xs sm:text-sm">
+              <RefreshCw size={16} className="mr-1.5 sm:mr-2" />
               Quick Quiz
             </Button>
           </Link>
-          <Link to="/flashcards">
-            <Button>
-              <ArrowRight size={18} className="mr-2" />
+          <Link to="/flashcards" className="flex-1 sm:flex-none">
+            <Button className="w-full text-xs sm:text-sm">
+              <ArrowRight size={16} className="mr-1.5 sm:mr-2" />
               Review All
             </Button>
           </Link>
         </div>
       </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
+        <div className="lg:col-span-2 space-y-6 sm:space-y-8">
           <section>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-                <AlertCircle size={20} className="text-red-500" />
+              <h2 className="text-lg sm:text-xl font-bold text-slate-800 flex items-center gap-2">
+                <AlertCircle size={18} className="text-red-500 sm:w-5 sm:h-5" />
                 Needs Attention ({reviewWords.length})
               </h2>
-              <button className="text-sm text-indigo-600 font-bold hover:underline">Clear all</button>
+              <button className="text-xs sm:text-sm text-indigo-600 font-bold hover:underline">Clear all</button>
             </div>
             
             <div className="space-y-3">
@@ -67,32 +69,26 @@ export const ReviewPage = () => {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                 >
-                  <Card className="p-4 flex items-center justify-between hover:border-red-100 transition-colors">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-xl bg-red-50 text-red-500 flex items-center justify-center font-bold text-lg">
+                  <Card className="p-3 sm:p-4 flex items-center justify-between hover:border-red-100 transition-colors">
+                    <div className="flex items-center gap-3 sm:gap-4">
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-red-50 text-red-500 flex items-center justify-center font-bold text-base sm:text-lg">
                         {word.data.word[0]}
                       </div>
-                      <div>
-                        <h3 className="font-bold text-slate-900">{word.data.word}</h3>
-                        <p className="text-xs text-slate-500">{word.data.meaningVietnamese}</p>
+                      <div className="min-w-0">
+                        <h3 className="font-bold text-slate-900 text-sm sm:text-base truncate">{word.data.word}</h3>
+                        <p className="text-[10px] sm:text-xs text-slate-500 truncate">{word.data.meaningVietnamese}</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-6">
-                      <div className="text-right hidden sm:block">
+                    <div className="flex items-center gap-3 sm:gap-6">
+                      <div className="text-right hidden md:block">
                         <p className="text-[10px] text-slate-400 uppercase font-bold">Errors</p>
                         <p className="text-sm font-bold text-red-500">{word.wrongCount}</p>
                       </div>
-                      <div className="text-right hidden sm:block">
-                        <p className="text-[10px] text-slate-400 uppercase font-bold">Last seen</p>
-                        <p className="text-sm font-medium text-slate-600">
-                          {word.lastReviewed ? new Date(word.lastReviewed).toLocaleDateString() : 'Never'}
-                        </p>
-                      </div>
-                      <Badge variant={word.isHardWord ? 'error' : 'warning'}>
+                      <Badge variant={word.isHardWord ? 'error' : 'warning'} className="text-[10px] sm:text-xs px-2 py-0.5">
                         {word.isHardWord ? 'Hard' : word.status}
                       </Badge>
-                      <Button variant="ghost" size="icon">
-                        <ArrowRight size={18} />
+                      <Button variant="ghost" size="icon" className="w-8 h-8 sm:w-10 sm:h-10">
+                        <ArrowRight size={16} className="sm:w-[18px] sm:h-[18px]" />
                       </Button>
                     </div>
                   </Card>

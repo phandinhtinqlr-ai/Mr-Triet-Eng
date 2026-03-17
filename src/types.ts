@@ -50,4 +50,5 @@ export interface AppState {
   lastLessonDate: string | null;
   todayWords: string[]; // wordIds
   history: DailyActivity[];
+  customVocabulary: Word[];
 }

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { AppState, UserProfile, UserWordProgress, DailyActivity } from '../types';
+import { AppState, UserProfile, UserWordProgress, DailyActivity, Word } from '../types';
 import { DEFAULT_USER } from '../data/user';
 import { ALL_VOCABULARY } from '../data/vocabulary';
 
@@ -9,14 +9,19 @@ export function useAppState() {
   const [state, setState] = useState<AppState>(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
-      return JSON.parse(saved);
+      const parsed = JSON.parse(saved);
+      return {
+        ...parsed,
+        customVocabulary: parsed.customVocabulary || []
+      };
     }
     return {
       user: null, // Start with null for login
       progress: {},
       lastLessonDate: null,
       todayWords: [],
-      history: []
+      history: [],
+      customVocabulary: []
     };
   });
 
@@ -111,24 +116,26 @@ export function useAppState() {
     if (state.lastLessonDate === today && state.todayWords.length > 0) {
       return state.todayWords;
     }
+    return [];
+  };
 
-    // Deterministic selection based on date string
-    const seed = today.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    const shuffled = [...ALL_VOCABULARY].sort((a, b) => {
-      const hashA = (parseInt(a.id) * seed) % 100;
-      const hashB = (parseInt(b.id) * seed) % 100;
-      return hashA - hashB;
-    });
+  const setTodayCustomWords = (words: Omit<Word, 'id'>[]) => {
+    const today = new Date().toDateString();
+    const newWords: Word[] = words.map((w, idx) => ({
+      ...w,
+      id: `custom-${Date.now()}-${idx}`
+    }));
 
-    const selectedIds = shuffled.slice(0, 10).map(w => w.id);
-    
     setState(prev => ({
       ...prev,
       lastLessonDate: today,
-      todayWords: selectedIds
+      todayWords: newWords.map(w => w.id),
+      customVocabulary: [...(prev.customVocabulary || []), ...newWords]
     }));
+  };
 
-    return selectedIds;
+  const getAllWords = () => {
+    return [...ALL_VOCABULARY, ...(state.customVocabulary || [])];
   };
 
   return {
@@ -137,6 +144,8 @@ export function useAppState() {
     logout,
     updateProgress,
     getTodayWords,
+    setTodayCustomWords,
+    getAllWords,
     recordActivity
   };
 }

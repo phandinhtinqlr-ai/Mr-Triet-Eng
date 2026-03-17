@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useAppState } from '../hooks/useAppState';
-import { ALL_VOCABULARY } from '../data/vocabulary';
 import { Card, Button, Badge } from '../components/UI';
 import { Volume2, RotateCcw, CheckCircle2, XCircle, Trophy, ArrowRight, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -8,14 +7,15 @@ import { useNavigate } from 'react-router-dom';
 import { cn } from '../components/UI';
 
 export const QuizPage = () => {
-  const { state, updateProgress, recordActivity } = useAppState();
+  const { state, updateProgress, recordActivity, getAllWords } = useAppState();
   const navigate = useNavigate();
+  const allWords = getAllWords();
 
   // Create a quiz from words being learned or new words
   const [quizWords] = useState(() => {
     const learningIds = Object.keys(state.progress).filter(id => state.progress[id].status !== 'mastered');
-    const pool = learningIds.length >= 5 ? learningIds : ALL_VOCABULARY.map(w => w.id);
-    return [...pool].sort(() => Math.random() - 0.5).slice(0, 5).map(id => ALL_VOCABULARY.find(w => w.id === id)!);
+    const pool = learningIds.length >= 5 ? learningIds : allWords.map(w => w.id);
+    return [...pool].sort(() => Math.random() - 0.5).slice(0, 5).map(id => allWords.find(w => w.id === id)!).filter(Boolean);
   });
 
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -28,7 +28,8 @@ export const QuizPage = () => {
 
   const [options] = useState(() => {
     const generateOptions = (word: typeof currentWord) => {
-      const others = ALL_VOCABULARY.filter(w => w.id !== word.id).sort(() => Math.random() - 0.5).slice(0, 3);
+      if (!word) return [];
+      const others = allWords.filter(w => w.id !== word.id).sort(() => Math.random() - 0.5).slice(0, 3);
       return [word, ...others].sort(() => Math.random() - 0.5);
     };
     return quizWords.map(w => generateOptions(w));
@@ -69,6 +70,15 @@ export const QuizPage = () => {
     utterance.lang = 'en-US';
     window.speechSynthesis.speak(utterance);
   };
+
+  if (quizWords.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-6">
+        <h1 className="text-3xl font-bold text-slate-900">Chưa có từ vựng</h1>
+        <p className="text-slate-500 max-w-md">Bạn chưa có từ vựng nào để làm bài kiểm tra. Hãy tạo bài học mới nhé!</p>
+      </div>
+    );
+  }
 
   if (showResult) {
     return (
@@ -122,22 +132,22 @@ export const QuizPage = () => {
         </div>
       </header>
 
-      <Card className="p-8 space-y-8">
+      <Card className="p-4 sm:p-8 space-y-6 sm:space-y-8">
         <div className="text-center space-y-4">
-          <Badge variant="default" className="bg-indigo-50 text-indigo-600 px-4 py-1">What is the meaning of:</Badge>
-          <div className="flex items-center justify-center gap-4">
-            <h2 className="text-5xl font-bold text-slate-900">{currentWord.word}</h2>
+          <Badge variant="default" className="bg-indigo-50 text-indigo-600 px-3 sm:px-4 py-1 text-[10px] sm:text-xs">What is the meaning of:</Badge>
+          <div className="flex items-center justify-center gap-3 sm:gap-4">
+            <h2 className="text-3xl sm:text-5xl font-bold text-slate-900">{currentWord.word}</h2>
             <button 
               onClick={() => speak(currentWord.word)}
               className="text-slate-400 hover:text-indigo-600 transition-colors"
             >
-              <Volume2 size={32} />
+              <Volume2 size={24} className="sm:w-8 sm:h-8" />
             </button>
           </div>
-          <p className="text-slate-400 font-mono italic">{currentWord.phonetic}</p>
+          {currentWord.phonetic && <p className="text-sm sm:text-base text-slate-400 font-mono italic">{currentWord.phonetic}</p>}
         </div>
 
-        <div className="grid grid-cols-1 gap-3">
+        <div className="grid grid-cols-1 gap-2 sm:gap-3">
           {options[currentIndex].map((option) => {
             const isSelected = selectedOption === option.id;
             const isCorrectOption = option.id === currentWord.id;
@@ -155,13 +165,13 @@ export const QuizPage = () => {
                 disabled={!!selectedOption}
                 onClick={() => handleOptionSelect(option.id)}
                 className={cn(
-                  "w-full p-5 rounded-2xl border-2 text-left font-semibold transition-all flex items-center justify-between",
+                  "w-full p-4 sm:p-5 rounded-xl sm:rounded-2xl border-2 text-left font-semibold transition-all flex items-center justify-between text-sm sm:text-base",
                   variantClass
                 )}
               >
                 <span>{option.meaningVietnamese}</span>
-                {selectedOption && isCorrectOption && <CheckCircle2 size={20} className="text-emerald-500" />}
-                {selectedOption && isSelected && !isCorrectOption && <XCircle size={20} className="text-red-500" />}
+                {selectedOption && isCorrectOption && <CheckCircle2 size={18} className="text-emerald-500 sm:w-5 sm:h-5" />}
+                {selectedOption && isSelected && !isCorrectOption && <XCircle size={18} className="text-red-500 sm:w-5 sm:h-5" />}
               </button>
             );
           })}
@@ -172,21 +182,21 @@ export const QuizPage = () => {
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="pt-4"
+              className="pt-2 sm:pt-4"
             >
               <div className={cn(
-                "p-4 rounded-xl flex items-start gap-3 mb-6",
+                "p-3 sm:p-4 rounded-xl flex items-start gap-3 mb-4 sm:mb-6",
                 isCorrect ? "bg-emerald-50 text-emerald-800" : "bg-red-50 text-red-800"
               )}>
-                {isCorrect ? <CheckCircle2 size={20} className="shrink-0" /> : <XCircle size={20} className="shrink-0" />}
+                {isCorrect ? <CheckCircle2 size={18} className="shrink-0 sm:w-5 sm:h-5" /> : <XCircle size={18} className="shrink-0 sm:w-5 sm:h-5" />}
                 <div>
-                  <p className="font-bold">{isCorrect ? 'Correct!' : 'Incorrect'}</p>
-                  <p className="text-sm mt-1">
+                  <p className="font-bold text-sm sm:text-base">{isCorrect ? 'Correct!' : 'Incorrect'}</p>
+                  <p className="text-xs sm:text-sm mt-0.5 sm:mt-1">
                     <span className="font-bold">{currentWord.word}</span> means <span className="italic">"{currentWord.meaningVietnamese}"</span>.
                   </p>
                 </div>
               </div>
-              <Button onClick={handleNext} className="w-full py-4 text-lg">
+              <Button onClick={handleNext} className="w-full py-4 text-base sm:text-lg">
                 {currentIndex < quizWords.length - 1 ? 'Next Question' : 'Finish Quiz'}
                 <ChevronRight size={20} className="ml-2" />
               </Button>
