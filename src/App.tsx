@@ -11,6 +11,7 @@ import { QuizPage } from './pages/QuizPage';
 import { ReviewPage } from './pages/ReviewPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { CreateLessonPage } from './pages/CreateLessonPage';
+import { ManageLessonPage } from './pages/ManageLessonPage';
 import { motion, AnimatePresence } from 'motion/react';
 
 const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
@@ -48,6 +49,7 @@ export default function App() {
         
         <Route path="/" element={<ProtectedLayout><DashboardPage /></ProtectedLayout>} />
         <Route path="/create-lesson" element={<ProtectedLayout><CreateLessonPage /></ProtectedLayout>} />
+        <Route path="/manage-lesson" element={<ProtectedLayout><ManageLessonPage /></ProtectedLayout>} />
         <Route path="/lesson" element={<ProtectedLayout><DailyLessonPage /></ProtectedLayout>} />
         <Route path="/flashcards" element={<ProtectedLayout><FlashcardsPage /></ProtectedLayout>} />
         <Route path="/images" element={<ProtectedLayout><ImageLearningPage /></ProtectedLayout>} />

@@ -134,6 +134,28 @@ export function useAppState() {
     }));
   };
 
+  const addTodayWord = (word: Omit<Word, 'id'>) => {
+    const newWord: Word = {
+      ...word,
+      id: `custom-${Date.now()}`
+    };
+
+    setState(prev => ({
+      ...prev,
+      todayWords: [...prev.todayWords, newWord.id],
+      customVocabulary: [...(prev.customVocabulary || []), newWord]
+    }));
+  };
+
+  const updateTodayWord = (wordId: string, updatedWord: Partial<Word>) => {
+    setState(prev => ({
+      ...prev,
+      customVocabulary: prev.customVocabulary.map(w => 
+        w.id === wordId ? { ...w, ...updatedWord } : w
+      )
+    }));
+  };
+
   const getAllWords = () => {
     return [...ALL_VOCABULARY, ...(state.customVocabulary || [])];
   };
@@ -145,6 +167,8 @@ export function useAppState() {
     updateProgress,
     getTodayWords,
     setTodayCustomWords,
+    addTodayWord,
+    updateTodayWord,
     getAllWords,
     recordActivity
   };

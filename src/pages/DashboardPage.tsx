@@ -87,6 +87,11 @@ export const DashboardPage = () => {
                       <ArrowRight className="ml-2" size={20} />
                     </Button>
                   </Link>
+                  <Link to="/manage-lesson">
+                    <Button variant="ghost" className="w-full sm:w-auto text-white hover:bg-white/20 border-none px-6 sm:px-8 py-4 sm:py-6 text-base sm:text-lg font-bold">
+                      Sửa từ học hôm nay
+                    </Button>
+                  </Link>
                 </>
               ) : (
                 <>
