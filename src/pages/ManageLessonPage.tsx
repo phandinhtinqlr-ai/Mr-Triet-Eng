@@ -6,7 +6,7 @@ import { Plus, Trash2, ArrowRight, BookOpen, Save } from 'lucide-react';
 import { Word } from '../types';
 
 export const ManageLessonPage = () => {
-  const { state, updateTodayWord, addTodayWord } = useAppState();
+  const { state, updateTodayWord, addTodayWord, deleteTodayWord } = useAppState();
   const navigate = useNavigate();
   
   // Filter today's words
@@ -17,6 +17,11 @@ export const ManageLessonPage = () => {
   const handleUpdateWord = (wordId: string, field: keyof Word, value: string) => {
     setWords(words.map(w => w.id === wordId ? { ...w, [field]: value } : w));
     updateTodayWord(wordId, { [field]: value });
+  };
+
+  const handleDeleteWord = (wordId: string) => {
+    deleteTodayWord(wordId);
+    setWords(words.filter(w => w.id !== wordId));
   };
 
   const handleAddNewWord = () => {
@@ -64,6 +69,13 @@ export const ManageLessonPage = () => {
                   placeholder="Từ tiếng Anh"
                   className="flex-1 px-3 py-2 rounded-lg border border-slate-200"
                 />
+                <button
+                  onClick={() => handleDeleteWord(word.id)}
+                  className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                  title="Xóa từ này"
+                >
+                  <Trash2 size={20} />
+                </button>
               </div>
             </div>
           ))}

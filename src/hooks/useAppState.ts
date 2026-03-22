@@ -156,6 +156,14 @@ export function useAppState() {
     }));
   };
 
+  const deleteTodayWord = (wordId: string) => {
+    setState(prev => ({
+      ...prev,
+      todayWords: prev.todayWords.filter(id => id !== wordId),
+      customVocabulary: prev.customVocabulary.filter(w => w.id !== wordId)
+    }));
+  };
+
   const getAllWords = () => {
     return [...ALL_VOCABULARY, ...(state.customVocabulary || [])];
   };
@@ -169,6 +177,7 @@ export function useAppState() {
     setTodayCustomWords,
     addTodayWord,
     updateTodayWord,
+    deleteTodayWord,
     getAllWords,
     recordActivity
   };
