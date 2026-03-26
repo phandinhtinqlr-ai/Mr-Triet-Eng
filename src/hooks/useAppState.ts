@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import { AppState, UserProfile, UserWordProgress, DailyActivity, Word } from '../types';
 import { DEFAULT_USER } from '../data/user';
 import { ALL_VOCABULARY } from '../data/vocabulary';
 
 const STORAGE_KEY = 'triet_english_app_state';
 
-export function useAppState() {
+export function useAppProviderState() {
   const [state, setState] = useState<AppState>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
@@ -190,3 +190,17 @@ export function useAppState() {
     recordActivity
   };
 }
+
+const AppStateContext = createContext<ReturnType<typeof useAppProviderState> | null>(null);
+
+export const AppStateProvider = ({ children }: { children: ReactNode }) => {
+  const value = useAppProviderState();
+  return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>;
+};
+
+export const useAppState = () => {
+  const context = useContext(AppStateContext);
+  if (!context) throw new Error('useAppState must be used within AppStateProvider');
+  return context;
+};
+
