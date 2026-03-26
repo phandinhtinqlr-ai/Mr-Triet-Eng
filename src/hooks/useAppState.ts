@@ -7,13 +7,17 @@ const STORAGE_KEY = 'triet_english_app_state';
 
 export function useAppState() {
   const [state, setState] = useState<AppState>(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      return {
-        ...parsed,
-        customVocabulary: parsed.customVocabulary || []
-      };
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return {
+          ...parsed,
+          customVocabulary: parsed.customVocabulary || []
+        };
+      }
+    } catch (error) {
+      console.warn('localStorage is not available', error);
     }
     return {
       user: null, // Start with null for login
@@ -26,7 +30,11 @@ export function useAppState() {
   });
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (error) {
+      console.warn('localStorage is not available', error);
+    }
   }, [state]);
 
   const recordActivity = (activity: Partial<DailyActivity>) => {
