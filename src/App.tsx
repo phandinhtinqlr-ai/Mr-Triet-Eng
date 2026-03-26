@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAppState } from './hooks/useAppState';
 import { Sidebar } from './components/Sidebar';
 import { LoginPage } from './pages/LoginPage';
@@ -16,6 +16,7 @@ import { motion, AnimatePresence } from 'motion/react';
 
 const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
   const { state } = useAppState();
+  const location = useLocation();
 
   if (!state.user) {
     return <Navigate to="/login" replace />;
@@ -27,7 +28,7 @@ const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
       <main className="flex-1 p-4 md:p-8 pb-24 lg:pb-8 overflow-y-auto max-h-screen">
         <AnimatePresence mode="wait">
           <motion.div
-            key={window.location.pathname}
+            key={location.pathname}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
