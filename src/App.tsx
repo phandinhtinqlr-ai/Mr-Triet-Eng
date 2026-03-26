@@ -14,12 +14,18 @@ import { CreateLessonPage } from './pages/CreateLessonPage';
 import { ManageLessonPage } from './pages/ManageLessonPage';
 import { motion, AnimatePresence } from 'motion/react';
 
-const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
+// Inner app that has access to router context (useLocation)
+const AppInner = () => {
   const { state } = useAppState();
   const location = useLocation();
 
   if (!state.user) {
-    return <Navigate to="/login" replace />;
+    // Allow login page without sidebar
+    return (
+      <Routes location={location} key={location.pathname}>
+        <Route path="*" element={<LoginPage />} />
+      </Routes>
+    );
   }
 
   return (
@@ -32,9 +38,21 @@ const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.2 }}
           >
-            {children}
+            <Routes location={location} key={location.pathname}>
+              <Route path="/" element={<DashboardPage />} />
+              <Route path="/create-lesson" element={<CreateLessonPage />} />
+              <Route path="/manage-lesson" element={<ManageLessonPage />} />
+              <Route path="/lesson" element={<DailyLessonPage />} />
+              <Route path="/flashcards" element={<FlashcardsPage />} />
+              <Route path="/images" element={<ImageLearningPage />} />
+              <Route path="/quiz" element={<QuizPage />} />
+              <Route path="/review" element={<ReviewPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/login" element={<Navigate to="/" replace />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
           </motion.div>
         </AnimatePresence>
       </main>
@@ -45,21 +63,7 @@ const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
 export default function App() {
   return (
     <Router>
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        
-        <Route path="/" element={<ProtectedLayout><DashboardPage /></ProtectedLayout>} />
-        <Route path="/create-lesson" element={<ProtectedLayout><CreateLessonPage /></ProtectedLayout>} />
-        <Route path="/manage-lesson" element={<ProtectedLayout><ManageLessonPage /></ProtectedLayout>} />
-        <Route path="/lesson" element={<ProtectedLayout><DailyLessonPage /></ProtectedLayout>} />
-        <Route path="/flashcards" element={<ProtectedLayout><FlashcardsPage /></ProtectedLayout>} />
-        <Route path="/images" element={<ProtectedLayout><ImageLearningPage /></ProtectedLayout>} />
-        <Route path="/quiz" element={<ProtectedLayout><QuizPage /></ProtectedLayout>} />
-        <Route path="/review" element={<ProtectedLayout><ReviewPage /></ProtectedLayout>} />
-        <Route path="/profile" element={<ProtectedLayout><ProfilePage /></ProtectedLayout>} />
-
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+      <AppInner />
     </Router>
   );
 }
