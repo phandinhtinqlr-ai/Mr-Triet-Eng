@@ -11,7 +11,7 @@ export const CreateLessonPage = () => {
   const navigate = useNavigate();
   
   const [words, setWords] = useState<Array<{ word: string; meaningVietnamese: string; isGenerating?: boolean }>>(
-    Array(10).fill({ word: '', meaningVietnamese: '' })
+    Array(1).fill({ word: '', meaningVietnamese: '' })
   );
 
   const handleAddRow = () => {
@@ -28,7 +28,7 @@ export const CreateLessonPage = () => {
 
   const handleReset = () => {
     console.log('Reset clicked');
-    setWords(Array(10).fill({ word: '', meaningVietnamese: '' }));
+    setWords(Array(1).fill({ word: '', meaningVietnamese: '' }));
   };
 
   const handleChange = (index: number, field: 'word' | 'meaningVietnamese', value: string) => {
@@ -182,6 +182,15 @@ export const CreateLessonPage = () => {
               </div>
             ))}
           </div>
+
+          {words.length < 10 && (
+            <div className="pt-2">
+              <Button type="button" variant="outline" onClick={handleAddRow} className="w-full border-dashed text-slate-500 hover:text-slate-700">
+                <Plus size={20} className="mr-2" />
+                Thêm dòng mới
+              </Button>
+            </div>
+          )}
 
           <div className="pt-6 border-t border-slate-100 flex justify-end">
             <Button type="submit" className="w-full sm:w-auto px-8 py-3 text-base">
