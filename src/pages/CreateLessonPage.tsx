@@ -60,7 +60,7 @@ export const CreateLessonPage = () => {
       const ai = new GoogleGenAI({ apiKey });
       
       const response = await ai.models.generateContent({
-        model: "gemini-1.5-flash",
+        model: "gemini-2.5-flash",
         contents: `Generate English words and image prompts for these Vietnamese meanings: ${validVietnameseWords.join(', ')}. Return as JSON array of objects with 'englishWord' and 'imagePrompt' fields.`,
         config: {
           responseMimeType: "application/json",
