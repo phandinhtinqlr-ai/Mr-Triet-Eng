@@ -119,7 +119,7 @@ export const CreateLessonPage = () => {
       partOfSpeech: 'unknown',
       exampleEnglish: '',
       exampleVietnamese: '',
-      imageUrl: `https://picsum.photos/seed/${encodeURIComponent(w.word)}/400/300`,
+      imageUrl: `https://loremflickr.com/400/300/${encodeURIComponent(w.word)},vocabulary/all`,
       topic: 'Custom',
       level: 'A1'
     }));
